@@ -63,7 +63,7 @@
           <input id="telem-upload" type="file" accept=".jsonl,application/json,text/plain"/>
           <span class="telem-upload-name" id="telem-upload-name">no file chosen</span>
         </label>
-        <p class="telem-hint">No trace handy? Each <a href="#recipes">recipe card below</a> has a one-click <em>Try sample</em> button.</p>
+        <p class="telem-hint">No trace handy? Each <a href="#recipes">recipe card below</a> has a one-click <em>Try sample</em> button. <strong>Using Claude Code already?</strong> Your session files are on disk — see the <a href="#recipes"><code>claude_code</code> recipe</a> for the one-liner that bundles them.</p>
       </div>
 
       <div class="telem-step">
@@ -181,10 +181,17 @@ agingbench run \
           <h3>claude_code</h3>
           <span class="friction-badge friction-low">drop-in · verified</span>
         </header>
-        <p class="recipe-what">Files Claude Code already writes — no export step.</p>
-        <pre class="recipe-cmd">ls ~/.claude/projects/*/*.jsonl
-# pick any .jsonl, drop it in Step 1</pre>
-        <p class="recipe-privacy">Contains: your prompts, agent replies, tool calls, token counts. PII patterns (emails, API keys, IPs) are auto-redacted before metric inference.</p>
+        <p class="recipe-what">Files Claude Code already writes — no export step. Each <code>.jsonl</code> = one session; concatenate several so aging signal can be computed.</p>
+        <pre class="recipe-cmd"># macOS / Linux — bundle your 10 most recent sessions:
+ls -t ~/.claude/projects/*/*.jsonl | head -10 | xargs cat &gt; /tmp/cc_combined.jsonl
+
+# Windows (PowerShell):
+Get-ChildItem $env:USERPROFILE\.claude\projects\*\*.jsonl |
+  Sort LastWriteTime -Desc | Select -First 10 |
+  Get-Content | Set-Content $env:TEMP\cc_combined.jsonl
+
+# Then drop the combined file into Step 1 and pick format=claude_code.</pre>
+        <p class="recipe-privacy">Contains: your prompts, agent replies, tool calls, token counts. PII patterns (emails, API keys, IPs) are auto-redacted before metric inference. <strong>Aging signal needs ≥3 sessions</strong> — picking a single <code>.jsonl</code> will trip the <code>coverage: underpowered</code> warning.</p>
         <button data-sample="claude_code" class="recipe-try">▶ Try sample (~4 sessions, all 4 mechanisms fire)</button>
       </article>
 
