@@ -280,41 +280,28 @@
 
       <div class="demo-panel" data-panel="maintenance">
         <div class="panel-header">
-          <span class="scenario-pill">S5 · Coding Agent</span>
+          <span class="scenario-pill">S6 · Naturalistic Multi-Domain</span>
           <span class="mechanism-pill mech-maintenance">Maintenance Aging</span>
         </div>
         <div class="panel-body">
-          <p class="probe-source">SUT config <code>gpt_oss_120b_lossy_growing_recompact.yaml</code> schedules a <code>recompact</code> shock at session 4. Constraint <code>K1</code> requires UUID primary keys for all database models (high fragility, "specific imports erode first").</p>
+          <p class="probe-source">Drawn from <code>s6_naturalistic/session_tasks.json</code>: session 0 ingests the 2022 e-commerce sales report, and recall probe <code>s0_p0</code> verifies the agent later remembers the #1 product. SUT <code>haiku45_lossy_growing_flush.yaml</code> schedules a <code>flush_history</code> shock at session 3 — the operator action that drops the conversation transcript, leaving only the compacted memory store <code>M<sub>t</sub></code>.</p>
           <div class="trace-grid">
             <div class="trace-col">
-              <div class="trace-day">Session 3 · before recompact shock</div>
-              <div class="trace-bubble user">"Create a quick Tag model in src/models/tag.py with fields: id, name, color."</div>
-              <div class="trace-bubble agent correct"><pre class="code-snippet">import uuid
-from sqlalchemy import Column, String
-
-class Tag(Base):
-    id = Column(UUID, primary_key=True,
-                default=uuid.uuid4)
-    name = Column(String)
-    color = Column(String)</pre><span class="tick">✓ matches K1</span></div>
+              <div class="trace-day">Session 1 · before the shock</div>
+              <div class="trace-bubble user">"What was the best-selling product on our e-commerce platform in 2022?"</div>
+              <div class="trace-bubble agent correct">"<strong>Quest Lumaflex Band</strong> — 4,892 units sold, $78,272 in revenue, top of the Fitness category." <span class="tick">✓</span></div>
             </div>
             <div class="trace-col">
-              <div class="trace-day">Session 5 · maintenance ran <code>recompact</code> at session 4</div>
-              <div class="trace-bubble user">"Create a Comment model with id, user_id, body."</div>
-              <div class="trace-bubble agent wrong"><pre class="code-snippet">from sqlalchemy import Column, Integer, String
-
-class Comment(Base):
-    id = Column(Integer, primary_key=True,
-                autoincrement=True)
-    user_id = Column(Integer)
-    body = Column(String)</pre><span class="cross">✗ negative pattern <code>AutoField</code></span></div>
+              <div class="trace-day">Session 5 · after <code>flush_history</code> at session 3</div>
+              <div class="trace-bubble user">Same question.</div>
+              <div class="trace-bubble agent wrong">"Several fitness products dominated 2022; Lumaflex-branded resistance gear appeared multiple times in the top 10. I don't have the exact unit counts in my notes anymore." <span class="cross">✗ <small>(generic — no product name, no number)</small></span></div>
             </div>
           </div>
           <div class="ground-truth">
-            <span class="gt-label">Ground truth</span> · K1 was set at session 0 ("All database models MUST use UUID primary keys. Never use auto-incrementing integer IDs.") and never revised.
+            <span class="gt-label">Probe <code>s0_p0</code></span> · keywords = [<code>Quest Lumaflex Band</code>, <code>Lumaflex Band</code>], canonical answer = "Quest Lumaflex Band." The session-0 environment data never changed.
           </div>
           <div class="why-ages">
-            <strong>Why it ages.</strong> The recompact maintenance routine resummarized the conversation at session 4. The compaction prompt is generic ("preserve the project's design choices") and rolled K1 into a phrase like "use modern data types" that no longer constrains code generation. The agent did not query wrong, the substrate changed under it. Aging from <em>actions on</em> the agent, not from interaction with memory.
+            <strong>Why it ages.</strong> At session 3, the operator triggered a <code>flush_history</code> shock — conversation transcripts are dropped, leaving only the compacted memory store. Because the SUT uses <code>lossy_growing</code> compaction, <code>M<sub>t</sub></code> was already a paragraph paraphrase: the specific token <em>Quest Lumaflex Band</em> and the number <em>4,892</em> had been folded into a generic phrase. The agent isn't retrieving wrong — the substrate lost its specifics under the maintenance event. This is aging from <em>actions on</em> the agent, not from interaction with memory.
           </div>
         </div>
       </div>
