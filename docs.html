@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Docs · AgingBench</title>
-  <meta name="description" content="Scenarios catalog, methodology, AgingCard schema reference, contributing guide, roadmap, and maintenance pledge for AgingBench." />
+  <meta name="description" content="Scenarios catalog, methodology, AgingCard schema reference, contributing guide, and maintenance pledge for AgingBench." />
 
   <meta property="og:title" content="AgingBench documentation" />
   <meta property="og:description" content="Scenarios, methodology, AgingCard schema, contributing." />
@@ -43,7 +43,7 @@
   <div class="container">
     <p class="venue-tag">Reference &amp; methodology</p>
     <h1 class="hero-title">Docs</h1>
-    <p class="hero-tagline">Seven scenarios in detail, the temporal-DAG methodology, the counterfactual diagnosis story, the AgingCard schema, contribution guide, roadmap, and maintenance pledge.</p>
+    <p class="hero-tagline">Seven scenarios in detail, the temporal-DAG methodology, the counterfactual diagnosis story, the AgingCard schema, contribution guide, and maintenance pledge.</p>
   </div>
 </section>
 
@@ -60,7 +60,6 @@
       <a href="#schema" data-spy="schema">AgingCard schema</a>
       <a href="#samples" data-spy="samples">Sample cards</a>
       <a href="#contribute" data-spy="contribute">Contribute</a>
-      <a href="#roadmap" data-spy="roadmap">Roadmap</a>
       <a href="#pledge" data-spy="pledge">Maintenance pledge</a>
     </nav>
   </aside>
@@ -514,62 +513,15 @@ r = trace_to_card_v11(
   </div>
 </section>
 
-<!-- ========== ROADMAP ========== -->
-<section id="roadmap" class="section">
-  <div class="container">
-    <h2 class="section-title">Roadmap</h2>
-    <p class="section-lead">What ships now vs what we're committing to next. We keep the AgingCard schema backward-compatible across minor versions; later items here may move as we learn from external use.</p>
-
-    <div class="roadmap">
-      <div class="roadmap-version">v0.3.0 <span class="status ready">Now</span></div>
-      <div class="roadmap-body">
-        <h4>arXiv-v1 release</h4>
-        <ul>
-          <li>S1–S8 scenarios with temporal DAG + pressure dials</li>
-          <li>AgingCard schema v1.0.0 + validator + 8 sample cards</li>
-          <li><code>agingbench</code> + <code>agingbench-lite</code> CLIs in one <code>pip install</code> from git+https</li>
-          <li>Three integration-adapter skeletons (OpenAI Evals, LangSmith, Langfuse) and a working in-browser telemetry demo</li>
-          <li><code>ThresholdController</code> ABC for runtime control + CI workflow + AgingCard PR template</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="roadmap">
-      <div class="roadmap-version">v1.1 <span class="status beta">~8 weeks</span></div>
-      <div class="roadmap-body">
-        <h4>Control + telemetry CLI + Tier-1 swap-points</h4>
-        <ul>
-          <li>Controller CLI pluggability (<code>--controller-import-path</code>) with at least one reference controller (lag-recall trigger).</li>
-          <li>First-class Tier-1 swap-point flags: <code>--memory-policy</code> (Track B), <code>--retrieval-fn</code> / <code>--write-fn</code> (Track C). All reachable today via SUT YAML; v1.1 lifts them to the CLI and opens the Track-C leaderboard slot.</li>
-          <li>Telemetry CLI subcommand wrapping the existing <code>agingbench.telemetry.trace_to_card_v11</code> Python API.</li>
-          <li>S8 pressure-config integration (S8 ships in v0.3.0 as a Docker-only extension; v1.1 brings it under the unified PressureConfig surface).</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="roadmap">
-      <div class="roadmap-version">v1.5+ <span class="status planned">later</span></div>
-      <div class="roadmap-body">
-        <h4>Public leaderboard surface</h4>
-        <ul>
-          <li>Hosted leaderboard view (HuggingFace Spaces or similar) with live filters by model / scenario / mechanism — when external submissions justify the hosting cost.</li>
-          <li>Maintainer-side re-execution pipeline for VERIFIED badges on submitted cards.</li>
-        </ul>
-        <p class="muted-line" style="margin-top:6px;">Date intentionally open. Hosting + ops commitment depends on adoption signal in the months after v1.1.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ========== MAINTENANCE PLEDGE ========== -->
 <section id="pledge" class="section">
   <div class="container narrow">
     <h2 class="section-title">Maintenance pledge</h2>
     <div class="pledge">
       <h4>Sustained artifact, not a one-off paper page</h4>
-      <p>AgingBench is maintained by the UT Austin group (corresponding author: Jianing Zhu). We commit to: weekly review of submitted AgingCards; an 8-week release cadence; backward-compatible schema evolution across minor versions; transparent governance of leaderboard moves; published roadmap and changelog.</p>
+      <p>AgingBench is maintained by the UT Austin group (corresponding author: Jianing Zhu). We commit to: weekly review of submitted AgingCards; an 8-week release cadence; backward-compatible schema evolution across minor versions; transparent governance of leaderboard moves; published changelog.</p>
       <p>If a submission turns out to be misrepresented, the card moves to <code>leaderboard/_retracted/</code> with the dispute reasoning, never silently deleted.</p>
-      <p class="pledge-contact">Contact: <strong>agingbench@cs.utexas.edu</strong></p>
+      <p class="pledge-contact">Contact: <strong>zhujianing9810@gmail.com</strong></p>
     </div>
     <p class="muted-line">Authors: Jianing Zhu*, Yeonju Ro*, John Robertson, Kevin Wang, Junbo Li, Haris Vikalo, Aditya Akella, Zhangyang Wang (UT Austin). *equal contribution.</p>
   </div>
