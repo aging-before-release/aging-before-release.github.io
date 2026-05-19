@@ -53,12 +53,12 @@
     <nav class="docs-side-nav" aria-label="Page contents">
       <p class="docs-side-label">On this page</p>
       <a href="#scenarios" data-spy="scenarios">Scenarios</a>
-      <a href="#harbor" data-spy="harbor">Harbor integration <em>(planned)</em></a>
       <a href="#methodology" data-spy="methodology">Methodology</a>
       <a href="#diagnose" data-spy="diagnose">Component-aware diagnosis</a>
       <a href="#telemetry" data-spy="telemetry">Telemetry reference</a>
       <a href="#schema" data-spy="schema">AgingCard schema</a>
       <a href="#samples" data-spy="samples">Sample cards</a>
+      <a href="#harbor" data-spy="harbor">Harbor integration <em>(planned)</em></a>
       <a href="#contribute" data-spy="contribute">Contribute</a>
       <a href="#pledge" data-spy="pledge">Maintenance pledge</a>
     </nav>
@@ -171,102 +171,6 @@
       </dl>
     </article>
 
-  </div>
-</section>
-
-<!-- ========== HARBOR INTEGRATION ========== -->
-<section id="harbor" class="section">
-  <div class="container">
-    <h2 class="section-title">Planned Harbor integration</h2>
-    <p class="section-lead">In a planned post-v0.3.0 release, AgingBench will ship as a dataset for <a href="https://www.harborframework.com/">Harbor</a>, the agent-evaluation framework from the Terminal-Bench team. Harbor will own the runtime layer (containerised sandboxes, scheduling, agent adapters, cloud scale-out); AgingBench will continue to own the measurement layer (scenarios, the temporal DAG generator, counterfactual conditions, the AgingCard schema). The split would let us inherit Harbor's full agent catalog rather than maintain our own.</p>
-
-    <p class="callout-note"><strong>Not in v0.3.0.</strong> Harbor integration is deferred to a follow-up release. The dataset path, version pin, and CLI flag shape shown below illustrate the intended design; nothing in this section is shipping today. For the v0.3.0 launch, use the in-tree Tier-2 adapters (<code>claude_code</code>, <code>openhands</code>, <code>codex</code>) via <a href="use.html#quickstart"><code>agingbench run</code> directly</a> instead.</p>
-
-    <h3 class="subsection">Why route through Harbor</h3>
-    <p>The headline benefit is coverage: every agent Harbor supports works on AgingBench without any code in this repository. When Harbor adds a new adapter (a new CLI agent, a new agent framework), AgingBench inherits it on the next dataset run. The same dataset config drives evaluations against Claude Code, OpenHands, Codex CLI, Gemini CLI, Copilot CLI, Terminus-2, Mini-SWE-Agent, and whatever Harbor ships next.</p>
-
-    <h3 class="subsection">Built-in agents</h3>
-    <p>The current Harbor distribution ships first-party adapters for:</p>
-    <ul>
-      <li><strong><code>claude-code</code></strong>: Anthropic's Claude Code CLI</li>
-      <li><strong><code>codex-cli</code></strong>: OpenAI's Codex CLI</li>
-      <li><strong><code>copilot-cli</code></strong>: GitHub Copilot CLI</li>
-      <li><strong><code>gemini-cli</code></strong>: Google's Gemini CLI</li>
-      <li><strong><code>openhands</code></strong>: All Hands AI's OpenHands</li>
-      <li><strong><code>terminus-2</code></strong>: Harbor's reference ReAct agent</li>
-      <li><strong><code>mini-swe-agent</code></strong>: Mini SWE-Agent</li>
-    </ul>
-    <p>All of these can be evaluated on Tier 2 with a single flag change:</p>
-    <div class="code-block"><code>harbor run -d agingbench@v0.3 -a claude-code  -m anthropic/claude-sonnet-4-6
-harbor run -d agingbench@v0.3 -a openhands    -m openai/gpt-4o
-harbor run -d agingbench@v0.3 -a codex-cli    -m openai/gpt-5
-harbor run -d agingbench@v0.3 -a gemini-cli   -m google/gemini-3-pro</code></div>
-    <p class="muted-line">Run <code>harbor run --help</code> for the live list. New agents added to Harbor are picked up automatically; AgingBench requires no change.</p>
-
-    <h3 class="subsection">Custom agents</h3>
-    <p>Bringing your own agent is a Harbor-level concern; AgingBench has no agent code to subclass. Harbor exposes two interfaces, depending on where your agent lives.</p>
-
-    <p><strong>External agent</strong>. Lives on the host, interacts with the Harbor sandbox over a <code>ctx.exec</code> bash interface. Implement four methods:</p>
-    <pre class="card-preview">from harbor.agents import BaseAgent
-
-class MyAgent(BaseAgent):
-    def name(self):    return "my-agent"
-    def version(self): return "1.0"
-
-    def setup(self, ctx):
-        # one-time setup: pull artifacts, prime caches, etc.
-        ...
-
-    def run(self, ctx):
-        # exec bash inside the sandbox; populate ctx.result
-        out = ctx.exec("python my_agent.py --task " + ctx.task_path)
-        ctx.result.trace = out.stdout</pre>
-
-    <p><strong>Installed agent</strong>. Lives inside the container; Harbor handles install + invocation via a prompt template. Useful for agents that need a heavyweight in-container runtime.</p>
-    <pre class="card-preview">from harbor.agents import BaseInstalledAgent, with_prompt_template
-
-class MyInstalledAgent(BaseInstalledAgent):
-    def install(self, ctx):
-        ctx.exec_as_root("apt-get install -y my-agent")
-
-    @with_prompt_template
-    def run(self, ctx, prompt):
-        ctx.exec_as_agent(f"my-agent --prompt {prompt!r}")
-
-    def populate_context_post_run(self, ctx):
-        ctx.result.trajectory = ctx.read_file("/agent/trajectory.jsonl")</pre>
-
-    <p>Either way, point Harbor at your class:</p>
-    <div class="code-block"><code>harbor run -d agingbench@v0.3 \
-  --agent-import-path my_pkg.agents:MyAgent \
-  -m anthropic/claude-opus-4-7</code></div>
-
-    <h3 class="subsection">Scale and cloud execution</h3>
-    <p>Harbor parallelises locally with <code>--n-concurrent N</code> and ships cloud backends for distributed runs. The same dataset config works against any backend:</p>
-    <div class="code-block"><code># local, 8 parallel workers
-harbor run -d agingbench@v0.3 -a claude-code -n 8
-
-# Daytona: scale across managed sandboxes
-harbor run -d agingbench@v0.3 -a claude-code --env daytona -n 64
-
-# Modal: serverless sandbox fleet
-harbor run -d agingbench@v0.3 -a claude-code --env modal   -n 64</code></div>
-    <p>Useful when sweeping seeds, running the Full suite, or producing rollouts for RL training over AgingBench's longitudinal trajectories.</p>
-
-    <h3 class="subsection">What AgingBench owns vs. Harbor owns</h3>
-    <table class="schema-table">
-      <thead><tr><th>Concern</th><th>Owned by</th></tr></thead>
-      <tbody>
-        <tr><td>Agent adapters (Claude Code, OpenHands, custom <code>BaseAgent</code> subclasses)</td><td>Harbor</td></tr>
-        <tr><td>Sandboxes, scheduling, parallel + cloud execution</td><td>Harbor</td></tr>
-        <tr><td>Scenarios, temporal FactGraph, pressure dials</td><td>AgingBench</td></tr>
-        <tr><td>Counterfactual conditions and component-aware diagnosis</td><td>AgingBench</td></tr>
-        <tr><td>AgingCard schema, leaderboard submissions</td><td>AgingBench</td></tr>
-        <tr><td>Cost, latency, and trace bookkeeping</td><td>Harbor (raw) → AgingCard (structured)</td></tr>
-      </tbody>
-    </table>
-
-    <p class="muted-line" style="margin-top: 18px;">Harbor docs: <a href="https://www.harborframework.com/" rel="external">harborframework.com</a> · Source: <a href="https://github.com/harbor-framework/harbor" rel="external">harbor-framework/harbor</a></p>
   </div>
 </section>
 
@@ -486,6 +390,102 @@ r = trace_to_card_v11(
       </tbody>
     </table>
     <p class="muted-line">Find them in <code>prototype/examples/sample_cards/</code> in the repo. Each card is a standalone JSON; load it, read <code>headline</code> + <code>cost_and_efficiency</code>, and you have a complete picture of the run.</p>
+  </div>
+</section>
+
+<!-- ========== HARBOR INTEGRATION ========== -->
+<section id="harbor" class="section">
+  <div class="container">
+    <h2 class="section-title">Planned Harbor integration</h2>
+    <p class="section-lead">In a planned post-v0.3.0 release, AgingBench will ship as a dataset for <a href="https://www.harborframework.com/">Harbor</a>, the agent-evaluation framework from the Terminal-Bench team. Harbor will own the runtime layer (containerised sandboxes, scheduling, agent adapters, cloud scale-out); AgingBench will continue to own the measurement layer (scenarios, the temporal DAG generator, counterfactual conditions, the AgingCard schema). The split would let us inherit Harbor's full agent catalog rather than maintain our own.</p>
+
+    <p class="callout-note"><strong>Not in v0.3.0.</strong> Harbor integration is deferred to a follow-up release. The dataset path, version pin, and CLI flag shape shown below illustrate the intended design; nothing in this section is shipping today. For the v0.3.0 launch, use the in-tree Tier-2 adapters (<code>claude_code</code>, <code>openhands</code>, <code>codex</code>) via <a href="use.html#quickstart"><code>agingbench run</code> directly</a> instead.</p>
+
+    <h3 class="subsection">Why route through Harbor</h3>
+    <p>The headline benefit is coverage: every agent Harbor supports works on AgingBench without any code in this repository. When Harbor adds a new adapter (a new CLI agent, a new agent framework), AgingBench inherits it on the next dataset run. The same dataset config drives evaluations against Claude Code, OpenHands, Codex CLI, Gemini CLI, Copilot CLI, Terminus-2, Mini-SWE-Agent, and whatever Harbor ships next.</p>
+
+    <h3 class="subsection">Built-in agents</h3>
+    <p>The current Harbor distribution ships first-party adapters for:</p>
+    <ul>
+      <li><strong><code>claude-code</code></strong>: Anthropic's Claude Code CLI</li>
+      <li><strong><code>codex-cli</code></strong>: OpenAI's Codex CLI</li>
+      <li><strong><code>copilot-cli</code></strong>: GitHub Copilot CLI</li>
+      <li><strong><code>gemini-cli</code></strong>: Google's Gemini CLI</li>
+      <li><strong><code>openhands</code></strong>: All Hands AI's OpenHands</li>
+      <li><strong><code>terminus-2</code></strong>: Harbor's reference ReAct agent</li>
+      <li><strong><code>mini-swe-agent</code></strong>: Mini SWE-Agent</li>
+    </ul>
+    <p>All of these can be evaluated on Tier 2 with a single flag change:</p>
+    <div class="code-block"><code>harbor run -d agingbench@v0.3 -a claude-code  -m anthropic/claude-sonnet-4-6
+harbor run -d agingbench@v0.3 -a openhands    -m openai/gpt-4o
+harbor run -d agingbench@v0.3 -a codex-cli    -m openai/gpt-5
+harbor run -d agingbench@v0.3 -a gemini-cli   -m google/gemini-3-pro</code></div>
+    <p class="muted-line">Run <code>harbor run --help</code> for the live list. New agents added to Harbor are picked up automatically; AgingBench requires no change.</p>
+
+    <h3 class="subsection">Custom agents</h3>
+    <p>Bringing your own agent is a Harbor-level concern; AgingBench has no agent code to subclass. Harbor exposes two interfaces, depending on where your agent lives.</p>
+
+    <p><strong>External agent</strong>. Lives on the host, interacts with the Harbor sandbox over a <code>ctx.exec</code> bash interface. Implement four methods:</p>
+    <pre class="card-preview">from harbor.agents import BaseAgent
+
+class MyAgent(BaseAgent):
+    def name(self):    return "my-agent"
+    def version(self): return "1.0"
+
+    def setup(self, ctx):
+        # one-time setup: pull artifacts, prime caches, etc.
+        ...
+
+    def run(self, ctx):
+        # exec bash inside the sandbox; populate ctx.result
+        out = ctx.exec("python my_agent.py --task " + ctx.task_path)
+        ctx.result.trace = out.stdout</pre>
+
+    <p><strong>Installed agent</strong>. Lives inside the container; Harbor handles install + invocation via a prompt template. Useful for agents that need a heavyweight in-container runtime.</p>
+    <pre class="card-preview">from harbor.agents import BaseInstalledAgent, with_prompt_template
+
+class MyInstalledAgent(BaseInstalledAgent):
+    def install(self, ctx):
+        ctx.exec_as_root("apt-get install -y my-agent")
+
+    @with_prompt_template
+    def run(self, ctx, prompt):
+        ctx.exec_as_agent(f"my-agent --prompt {prompt!r}")
+
+    def populate_context_post_run(self, ctx):
+        ctx.result.trajectory = ctx.read_file("/agent/trajectory.jsonl")</pre>
+
+    <p>Either way, point Harbor at your class:</p>
+    <div class="code-block"><code>harbor run -d agingbench@v0.3 \
+  --agent-import-path my_pkg.agents:MyAgent \
+  -m anthropic/claude-opus-4-7</code></div>
+
+    <h3 class="subsection">Scale and cloud execution</h3>
+    <p>Harbor parallelises locally with <code>--n-concurrent N</code> and ships cloud backends for distributed runs. The same dataset config works against any backend:</p>
+    <div class="code-block"><code># local, 8 parallel workers
+harbor run -d agingbench@v0.3 -a claude-code -n 8
+
+# Daytona: scale across managed sandboxes
+harbor run -d agingbench@v0.3 -a claude-code --env daytona -n 64
+
+# Modal: serverless sandbox fleet
+harbor run -d agingbench@v0.3 -a claude-code --env modal   -n 64</code></div>
+    <p>Useful when sweeping seeds, running the Full suite, or producing rollouts for RL training over AgingBench's longitudinal trajectories.</p>
+
+    <h3 class="subsection">What AgingBench owns vs. Harbor owns</h3>
+    <table class="schema-table">
+      <thead><tr><th>Concern</th><th>Owned by</th></tr></thead>
+      <tbody>
+        <tr><td>Agent adapters (Claude Code, OpenHands, custom <code>BaseAgent</code> subclasses)</td><td>Harbor</td></tr>
+        <tr><td>Sandboxes, scheduling, parallel + cloud execution</td><td>Harbor</td></tr>
+        <tr><td>Scenarios, temporal FactGraph, pressure dials</td><td>AgingBench</td></tr>
+        <tr><td>Counterfactual conditions and component-aware diagnosis</td><td>AgingBench</td></tr>
+        <tr><td>AgingCard schema, leaderboard submissions</td><td>AgingBench</td></tr>
+        <tr><td>Cost, latency, and trace bookkeeping</td><td>Harbor (raw) → AgingCard (structured)</td></tr>
+      </tbody>
+    </table>
+
+    <p class="muted-line" style="margin-top: 18px;">Harbor docs: <a href="https://www.harborframework.com/" rel="external">harborframework.com</a> · Source: <a href="https://github.com/harbor-framework/harbor" rel="external">harbor-framework/harbor</a></p>
   </div>
 </section>
 
