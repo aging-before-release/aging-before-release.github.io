@@ -316,7 +316,7 @@
 <section id="analysis" class="section bg-soft" style="padding-top:48px; padding-bottom:48px;">
   <div class="container">
     <h2 class="section-title" style="margin-bottom:8px;">Analysis</h2>
-    <p class="section-lead" style="margin:0 0 24px;">Six analyzed results, each anchored on a results figure. Scroll the strip to see all six.</p>
+    <p class="section-lead" style="margin:0 0 24px;">Selected results, each anchored on a results figure — scroll the strip to browse. See our paper for detailed findings and intervention implications.</p>
 
     <div class="analysis-strip" role="list">
 
@@ -387,58 +387,6 @@
       </article>
 
     </div>
-  </div>
-</section>
-
-<!-- ========== FINDINGS MATRIX ========== -->
-<section id="findings" class="section">
-  <div class="container">
-    <h2 class="section-title">What we learned</h2>
-    <p class="section-lead" style="margin:0 0 24px;">Five findings from the v0.3.0 results. Each maps to a mechanism, points to evidence in the paper, and suggests a practical intervention.</p>
-
-    <table class="findings-matrix">
-      <thead>
-        <tr>
-          <th>Finding</th>
-          <th>Mechanism</th>
-          <th>Evidence</th>
-          <th>What to do about it</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Aging is often silent</td>
-          <td><span class="mech-tag">Compression</span></td>
-          <td>S2: CVR stays near 0 while constraint precision drops 0.80 → 0.40</td>
-          <td>Score epistemic precision, not just behavioral compliance</td>
-        </tr>
-        <tr>
-          <td>Policy beats model scale</td>
-          <td><span class="mech-tag">Compression</span></td>
-          <td>S1: careful vs. lossy compaction prompt produces ~4.5× half-life difference, larger than any model swap</td>
-          <td>Tune the compaction prompt before tuning the model</td>
-        </tr>
-        <tr>
-          <td>Revision aging is representational, not capacity</td>
-          <td><span class="mech-tag">Revision</span></td>
-          <td>S2: Llama-8B frozen at $893 for 9 sessions while gold drifts to $76; bigger context doesn't help</td>
-          <td>Promote derived state to a typed object (counter, ledger); don't store it as text</td>
-        </tr>
-        <tr>
-          <td>The write-read gap persists under self-management</td>
-          <td><span class="mech-tag">Interference</span></td>
-          <td>S7: workspace fidelity ≈ 0.85 across models while recall spans 0.15 (GPT-4o-mini) to 0.74 (Sonnet 4.6) — the agent stores the fact and then under-consults it</td>
-          <td>Fix the retrieval/utilization side; under-consultation isn't a write problem</td>
-        </tr>
-        <tr>
-          <td>Some maintenance heals, some kills</td>
-          <td><span class="mech-tag">Maintenance</span></td>
-          <td>S6: flush_history@4 produces m_final = 0.083 vs. control 0.250 (67% worse, no recovery); partial_reset is therapeutic (+0.10)</td>
-          <td>Audit maintenance events; some "routine" routines are destructive</td>
-        </tr>
-      </tbody>
-    </table>
-    <p class="muted-line" style="margin-top:18px;">Full results table, per-scenario aging curves, and mechanism-level figures live on the <a href="leaderboard.html">leaderboard</a> and in the <a href="docs.html#methodology">methodology docs</a>.</p>
   </div>
 </section>
 
