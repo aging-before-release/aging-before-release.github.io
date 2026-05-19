@@ -67,7 +67,7 @@
 <section id="quickstart" class="section">
   <div class="container">
     <h2 class="section-title">Quickstart: Tier 2 in ten minutes</h2>
-    <p class="section-lead">Tier 2 is the headline — production agents on the S7 self-planning probe suite. Pick an in-tree adapter (<code>claude_code</code>, <code>openhands</code>, <code>codex</code>) or wire your own; AgingBench runs the session loop and emits a leaderboard-ready <a href="#card">AgingCard</a>.</p>
+    <p class="section-lead">Tier 2 is the headline — production agents on the S7 Research-Notes Coding Task. Pick an in-tree adapter (<code>claude_code</code>, <code>openhands</code>, <code>codex</code>) or wire your own; AgingBench runs the session loop and emits a leaderboard-ready <a href="#card">AgingCard</a>.</p>
 
     <p class="callout-note" style="margin-top:8px;"><strong>Prerequisites for Tier 2 (S7).</strong> The <code>claude_code</code> adapter shells out to the official Claude Code CLI, so install it once: <code>npm i -g @anthropic-ai/claude-code</code>. Without it, the runner hangs while the subprocess fails to start. For the <code>openhands</code> adapter, install the OpenHands SDK in a separate conda env and point <code>OPENHANDS_BRIDGE_PYTHON</code> at its python interpreter.</p>
 
@@ -179,9 +179,9 @@ print(r.card['headline'])"</pre>
         <tr><td>S2 · Lifestyle Assistant</td><td>10</td><td>~45k</td><td>~100</td><td>$0.20</td><td>$0.48</td><td>~5 min</td></tr>
         <tr><td>S3 · Knowledge Base</td><td>12</td><td>~60k</td><td>~120</td><td>$0.27</td><td>$0.65</td><td>~7 min</td></tr>
         <tr><td>S4 · Software Engineering</td><td>10</td><td>~55k</td><td>~110</td><td>$0.24</td><td>$0.58</td><td>~6 min</td></tr>
-        <tr><td>S5 · Coding Agent</td><td>10</td><td>~70k</td><td>~140</td><td>$0.31</td><td>$0.76</td><td>~8 min</td></tr>
+        <tr><td>S5 · Self-Planning Notebook</td><td>10</td><td>~70k</td><td>~140</td><td>$0.31</td><td>$0.76</td><td>~8 min</td></tr>
         <tr><td>S6 · Naturalistic</td><td>15</td><td>~85k</td><td>~170</td><td>$0.38</td><td>$0.92</td><td>~10 min</td></tr>
-        <tr><td>S7 · Self-Planning (Tier-2)</td><td>10</td><td>~120k</td><td>~200</td><td>$0.55</td><td>$1.30</td><td>~12 min</td></tr>
+        <tr><td>S7 · Research-Notes Coding Task (Tier-2)</td><td>10</td><td>~120k</td><td>~200</td><td>$0.55</td><td>$1.30</td><td>~12 min</td></tr>
         <tr class="row-total"><td>Lite (S1+S2+S7, 3 seeds)</td><td>—</td><td>~615k</td><td>~1140</td><td>~$5</td><td>~$12</td><td>~30 min</td></tr>
       </tbody>
     </table>
